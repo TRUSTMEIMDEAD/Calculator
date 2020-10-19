@@ -1,0 +1,239 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Calculator</title>
+</head>
+<style>
+      
+   body
+{
+	display:flex;
+	justify-content:center;
+	align-items:center;
+	min-height:100vh;
+	background:#FFFFFF;
+}
+    .container{
+
+        margin: 0 auto;
+        display:grid;
+        grid-template-columns: repeat( 4,1fr );
+        grid-gap: 5px;
+        background-color: rgb(208, 208, 208);
+        padding: 6px;
+        max-width: 400px;
+
+    }
+    .item{
+        background-color: white;
+        color: black;
+        display:flex;
+        justify-content: center;
+        cursor:pointer; 
+        font-size: 25px;
+        font-weight: bold;
+        padding: 19px;
+        align-items: center;
+    }
+    .oper{
+        background-color: rgb(235, 235, 235); //цвет кнопок
+    }
+    input{
+        padding: 0px;
+        width: 100%;
+        height: 40px;
+        border: none;
+        text-align:right;
+        font-size: 26px;
+        color: red;
+        outline:none;
+        background-color: rgb(245, 245, 245);
+        font-size: 32px;
+        
+    }
+    .input{
+        grid-column: 1/5;
+        grid-row: 2/3;
+        padding-right: 0px;
+       
+        
+    }
+    .secondD{
+        grid-column: 1/5;
+        grid-row: 1/2;
+        text-align:right;
+        padding-right: 5px;
+        font-size: 20px;
+        height: 30px;
+        
+    }
+    form{
+           max-width: 100%;
+    }
+    span:hover {
+	transition: all 500ms ease; 
+	background: rgba(0,0,0,0);
+	color: #FFFFFF;
+}
+
+
+
+
+
+</style>
+<body>
+<div class="container">
+    <div class="input" >
+        <form  name="form">   <input @keyup.enter = "equal()" type="text" name="textview" oninput="insertKey (), doubleIn()"> </form>
+    </div>
+    <span class="input secondD"> <span id="doublein"></span>  </span>
+    <span class="item oper" onclick = "cleanNum() "> CE </span>
+    <span class="item clean oper" onclick ="clean()"> C </span>
+    <span class="item back oper" onclick ="cleanLast()"> D </span>
+    <span class="item oper" onclick = "insert('/'), doubleIn()  ">&divide </span>
+    <span class="item" onclick = "insert('7') ">7</span>
+    <span class="item" onclick = "insert('8') "> 8</span>
+    <span class="item" onclick = "insert('9') "> 9</span>
+    <span class="item oper" onclick = "insert('*'), doubleIn() ">&times; </span>
+    <span class="item" onclick = "insert('4') "> 4</span>
+    <span class="item" onclick = "insert('5') "> 5</span>
+    <span class="item" onclick = "insert('6') "> 6</span>
+    <span class="item oper" onclick = "insert('-'), doubleIn() "> - </span>
+    <span class="item" onclick = "insert('1') "> 1</span>
+    <span class="item" onclick = "insert('2') "> 2</span>
+    <span class="item" onclick = "insert('3') "> 3</span>
+    <span class="item oper" onclick = "insert('+'), doubleIn() " > + </span>
+    <span class="item oper" onclick = " invert()"> ±</span>
+    <span class="item zero " onclick = "insert('0') "> 0</span>
+    <span class="item oper" onclick = "insert('.') "> .</span>
+    <span class="item equal oper" onclick = "equal()"> =</span>
+</div>
+
+    <script>
+        let answer=false;       // глобальная переменная, есть ли на экане какое-то вычисленное выражение
+        function Op(s){ // проверка: является ли символ операцией или точкой
+            ops=['+', '-', '*', '/','.'];    
+            for(let i=0; i<5; i++){             
+                if (s == ops[i]){       //сравнение числа с операциями
+                    return true;        
+                }
+            }
+            return false;
+        }
+
+        function insertKey (){              // обрабатывает ввод с клавиатуры   ---НЕ РАБОАТЕТ!!!---
+            let a=document.getElementById("doublein").innerHTML ;
+            let b=document.form.textview.value;
+            num=b[b.length-1];                  // введенный знак
+            if (Op(num)==true){             // если знак является операцией
+                if ( b.substring(0,b.length-1)=='' || Op(a[a.length-1])==true || Op(b[b.length-1])==true ){ //если его нельзя поставить
+                    document.form.textview.value = b.substring(0, b.length );   // перезаписываем строку тут же, без знака
+                }
+            }
+            
+        }
+
+        function insert(num){           // прибавляет к старому значению новую цифру
+
+            let a=document.getElementById("doublein").innerHTML ;
+            let b=document.form.textview.value;
+            if (Op(num)==true){                         // если это операция
+                if ( b !='' && Op(a[a.length])==false && Op(b[b.length-1])==false ){ //можно ли поставить операцию
+                    if(answer){                 // если выведен ответ на предыдущее выражение  то перевести ответ вверх и поставить к нему операцию
+                        document.getElementById("doublein").innerHTML=b+num;
+                        document.form.textview.value='';
+                        answer=false;
+                    }
+                    else{       // если не ответ то просто подставить операцию
+                        document.form.textview.value += num;
+                    }
+                }
+                
+            }
+            else{ // если вводится число и на экране ответ на предыдущее выражение стереть его, иначе просто записать число
+                if(answer==true){   
+                    clean();
+                    document.form.textview.value = num;
+                    answer=false;
+                }
+                else{
+                    document.form.textview.value += num;
+                }
+            }
+
+        }
+        function clean(){           // очистка обоих экранов
+            document.form.textview.value = "";              
+            document.getElementById("doublein").innerHTML='';
+
+        }
+        function cleanLast(){   //удаление последнего символа
+             let a = document.form.textview.value ;             
+             document.form.textview.value = a.substring(0,a.length-1); // перезаписываем в строку все с первого по предпоследний символ
+        }
+        function equal(){
+            document.getElementById("doublein").innerHTML += document.form.textview.value; //добавляем последнее введенное число
+            let a=document.getElementById("doublein").innerHTML ;
+            if(a){                                             //если строка не пустая то вычисляем её
+                if(eval(a) != undefined)   {                            // если выражение считается выводим ответ    
+                    document.form.textview.value =eval(a);
+                    answer=true;                        
+                }
+            }
+            
+
+        }
+        function invert(){      // +-
+ 
+            let a=document.form.textview.value ;
+            if(a){                          //
+                if (a[0] =='-'){                //если в конце строки стоит минус то выводим всю строку без него
+
+                    document.form.textview.value = a.substring(1,a.length);
+                }
+                else{               //если в конце строки нет минуса то прибавляем его
+                    document.form.textview.value = "-" + a ;
+                }
+            }
+        }
+        
+        function cleanNum(){            //удаляет последнее число
+            let a=document.form.textview.value ;
+            arr=['+', '-', '*', '/'];              
+            let num=false;
+            for(let i=1; i < a.length-1 && num==false; i++){        //алгоритм поиска знака операции
+                for(let j=0; j<4; j++){
+                    if(a[i]==arr[j]){
+                        document.form.textview.value = a.substring(0,i+1);      //если знак нашелся то вывести все до него
+                        num=true;
+                        break;
+                    }
+                }
+            }
+            if(!num){                           // если знака нет то значит всё -число, удалить
+                document.form.textview.value='';
+            }
+        }
+         
+
+        function doubleIn(){            // вывод чисел сверху срабатывает при каждом вводе
+
+            let a=document.form.textview.value ;   
+            let b =document.getElementById("doublein").innerHTML;
+            ops=['+', '-', '*', '/'];
+            for(let i=0; i<4; i++){             
+                if (a[a.length-1] == ops[i]){       //сравнение введённого числа с операциями
+                    document.getElementById("doublein").innerHTML += document.form.textview.value; // если введена операция то копируем строку вверх
+                    document.form.textview.value='';
+                    break;
+                }
+            }
+        }
+
+
+
+    </script>
+
+        
+</body>
+</html>
